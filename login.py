@@ -3,6 +3,10 @@ import threading
 from PIL import ImageTk
 import tkinter.messagebox as messagebox
 from tkinter import *
+import requests
+
+BASE_URL = "http://127.0.0.1:8000/"
+LOGIN_URL = "account/login/"
 
 
 def clear_data(user_entry, pass_entry):
@@ -10,20 +14,24 @@ def clear_data(user_entry, pass_entry):
     pass_entry.delete(0, END)
 
 def login(win,user_entry, pass_entry):
-    username_admin = "admin"
-    password_admin = "admin"
-
     username = user_entry.get()
     password = pass_entry.get()
-    
-    if username==username_admin and password==password_admin:
-        messagebox.showinfo("Successfully", "Login successful")
-        win.quit()
 
-        print("Login successful")
+    # POST / accounts
+    data = {
+        "username": username,
+        "password": password
+    }
+    response = requests.post(f"{BASE_URL}{LOGIN_URL}", data = data)
+    
+    if response.status_code == 200:
+        messagebox.showinfo("Successfully", response.json()['message'])
+        win.destroy()
+        # Dashboard 
+        import dashboard
     else:
-        messagebox.showerror("Login failed", "Invalid username or password")
-        print("Login failed")
+        messagebox.showerror("Login failed", response.json()['message'])
+  
 
 def login_window():
     win = tk.Tk()
